@@ -15,7 +15,7 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "Post" (
     "id" SERIAL NOT NULL,
-    "type" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
     "summary" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "status" INTEGER NOT NULL DEFAULT 1,
@@ -42,6 +42,7 @@ CREATE TABLE "Category" (
 CREATE TABLE "Comment" (
     "id" SERIAL NOT NULL,
     "message" TEXT NOT NULL,
+    "userId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -56,3 +57,6 @@ ALTER TABLE "Post" ADD CONSTRAINT "Post_ownerId_fkey" FOREIGN KEY ("ownerId") RE
 
 -- AddForeignKey
 ALTER TABLE "Post" ADD CONSTRAINT "Post_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Comment" ADD CONSTRAINT "Comment_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

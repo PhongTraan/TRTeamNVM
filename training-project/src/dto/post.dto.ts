@@ -3,7 +3,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty()
-  type: string;
+  title: string;
 
   @IsNotEmpty()
   summary: string;

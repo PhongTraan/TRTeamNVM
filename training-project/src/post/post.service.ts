@@ -4,6 +4,7 @@ import {
   CreatePostDto,
   PostFileType,
   PostPaginationResponseType,
+  updatePostDto,
 } from 'src/dto/post.dto';
 import { PrismaService } from 'src/prisma.service';
 
@@ -26,7 +27,7 @@ export class PostService {
       where: {
         OR: [
           {
-            type: {
+            title: {
               contains: search,
             },
             summary: {
@@ -39,6 +40,22 @@ export class PostService {
         ],
         AND: [{ status: 2 }],
       },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -50,7 +67,7 @@ export class PostService {
       where: {
         OR: [
           {
-            type: {
+            title: {
               contains: search,
             },
             summary: {
@@ -78,6 +95,23 @@ export class PostService {
 
   async getDetailsUser(id: number): Promise<Post> {
     return this.prismaService.post.findFirst({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async updatePost(id: number, data: updatePostDto): Promise<Post> {
+    return await this.prismaService.post.update({
+      where: {
+        id,
+      },
+      data,
+    });
+  }
+
+  async deletePost(id: number): Promise<Post> {
+    return await this.prismaService.post.delete({
       where: {
         id,
       },
