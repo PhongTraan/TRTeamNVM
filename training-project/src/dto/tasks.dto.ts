@@ -26,3 +26,8 @@ export class UpdateTaskDto {
   isCompleted?: boolean;
   isActive?: boolean;
 }
+
+export class TakeTaskDto {
+  assigneeId: number;
+  isAssigned: boolean;
+}

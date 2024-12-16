@@ -65,6 +65,7 @@ model Tasks {
   id          Int      @id @default(autoincrement())
   title       String
   description String
+  isAssigned  Boolean  @default(false)  
   isCompleted Boolean  @default(false)
   isActive    Boolean  @default(true)
   creatorId   Int

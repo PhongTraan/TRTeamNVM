@@ -58,6 +58,7 @@ CREATE TABLE "Tasks" (
     "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
+    "isAssigned" BOOLEAN NOT NULL DEFAULT false,
     "isCompleted" BOOLEAN NOT NULL DEFAULT false,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "creatorId" INTEGER NOT NULL,

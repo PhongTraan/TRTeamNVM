@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   CreateTaskDto,
+  TakeTaskDto,
   TaskFileType,
   TaskPaginationResponseType,
   UpdateTaskDto,
@@ -8,6 +9,7 @@ import {
 import { PrismaService } from 'src/prisma.service';
 import { TasksModule } from './tasks.module';
 import { Tasks } from '@prisma/client';
+// import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @Injectable()
 export class TasksService {
@@ -83,7 +85,7 @@ export class TasksService {
     });
   }
 
-  async updateTask(id: number, data: UpdateTaskDto) {
+  async updateTask(id: number, data: UpdateTaskDto): Promise<Tasks> {
     return await this.prismaService.tasks.update({
       where: {
         id,
@@ -92,7 +94,40 @@ export class TasksService {
     });
   }
 
-  // async takeTask()
+  // async takeTask(id: number, assigneeId: number) {
+  //   return await this.prismaService.tasks.update({
+  //     where: { id },
+  //     data: { assigneeId },
+  //   });
+  // }
+
+  async takeTask(id: number, takeTaskDto: TakeTaskDto): Promise<Tasks> {
+    const checkTask = await this.prismaService.tasks.findFirst({
+      where: { id },
+    });
+    if (!checkTask) throw new Error('Task already assigned');
+    const updatedTask = await this.prismaService.tasks.update({
+      where: { id },
+      data: {
+        assigneeId: takeTaskDto.assigneeId ?? null,
+        isAssigned: true,
+      },
+    });
+
+    return updatedTask;
+  }
+
+  // async cancelTask(id: number): Promise<Tasks> {
+  //   const task = await this.prismaService.tasks.update({
+  //     where: { id },
+  //     data: {
+  //       assigneeId: null,
+  //       isAssigned: false,
+  //     },
+  //   });
+
+  //   return task;
+  // }
 
   async deleteTask(id: number): Promise<Tasks> {
     return await this.prismaService.tasks.delete({

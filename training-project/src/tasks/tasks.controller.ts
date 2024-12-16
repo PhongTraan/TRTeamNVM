@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Put,
   Query,
@@ -14,6 +15,7 @@ import {
 import { TasksModule } from './tasks.module';
 import {
   CreateTaskDto,
+  TakeTaskDto,
   TaskFileType,
   TaskPaginationResponseType,
   UpdateTaskDto,
@@ -62,7 +64,26 @@ export class TasksController {
     return this.taskService.updateTask(id, data);
   }
 
+  //Function Take Task
+  // @Put(':id/take')
+  // @UseGuards(AuthGuard, RoleGuard)
+  // @Roles('USER')
+  // takeTask(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+  //   const userId = req.user.id;
+  //   return this.taskService.takeTask(id, userId);
+  // }
+
+  @Put('/task/:id')
+  @UseGuards(AuthGuard, RoleGuard)
+  // @Roles('USER')
+  takeTask(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    const assigneeId = req.user.id;
+    return this.taskService.takeTask(id, assigneeId);
+  }
+
   @Delete(':id')
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles('ADMIN')
   deleteTask(@Param('id', ParseIntPipe) id: number): Promise<TasksModule> {
     return this.taskService.deleteTask(id);
   }
