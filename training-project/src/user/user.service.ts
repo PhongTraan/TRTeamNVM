@@ -35,6 +35,7 @@ export class UserService {
     return res;
   }
 
+  
   async getAllUser(
     filters: UserFilerType,
   ): Promise<UserPaginationResponseType> {
@@ -101,12 +102,15 @@ export class UserService {
     });
   }
 
-  async updateAccountUser (id: number, data: updateProfileUserDto) : Promise<User> {
+  async updateAccountUser(
+    id: number,
+    data: updateProfileUserDto,
+  ): Promise<User> {
     return await this.prismaService.user.update({
-        where : {
-            id
-        },
-        data
-    })
+      where: {
+        id,
+      },
+      data,
+    });
   }
 }

@@ -28,7 +28,7 @@ export class AuthService {
     const hashPassword = await hash(useData.password, 10);
 
     const res = await this.prismaService.user.create({
-      data: { ...useData, password: hashPassword },
+      data: { ...useData, password: hashPassword, role: 'USER' },
     });
 
     return res;
@@ -60,14 +60,19 @@ export class AuthService {
     }
 
     //Step 3:
-    const payload = { id: user.id, email: user.email, password: user.password };
+    const payload = {
+      id: user.id,
+      email: user.email,
+      password: user.password,
+      role: user.role,
+    };
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: process.env.ACCESS_TOKEN_KEY,
       expiresIn: '1d',
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: process.env.ACCESS_TOKEN_KEY,
+      secret: process.env.REFRESH_TOKEN_KEY,
       expiresIn: '7d',
     });
 

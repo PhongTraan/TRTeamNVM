@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 import {
@@ -16,6 +17,9 @@ import {
   UserPaginationResponseType,
 } from 'src/dto/user.dto';
 import { UserService } from './user.service';
+import { Roles } from 'src/auth/roles.decorator';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/auth/roles.guard';
 
 @Controller('users')
 export class UserController {
@@ -26,6 +30,8 @@ export class UserController {
   }
 
   @Get('getAllUser')
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles('ADMIN')
   getAllUser(
     @Query() param: UserFilerType,
   ): Promise<UserPaginationResponseType> {
