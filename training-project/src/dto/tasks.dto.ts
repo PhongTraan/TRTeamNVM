@@ -27,7 +27,12 @@ export class UpdateTaskDto {
   isActive?: boolean;
 }
 
+// export class TakeTaskDto {
+//   assigneeId: number;
+//   isAssigned: boolean;
+// }
+
 export class TakeTaskDto {
   assigneeId: number;
-  isAssigned: boolean;
+  isAssigned?: boolean; 
 }

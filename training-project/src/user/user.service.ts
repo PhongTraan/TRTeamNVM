@@ -13,29 +13,28 @@ import { PrismaService } from 'src/prisma.service';
 export class UserService {
   constructor(private prismaService: PrismaService) {}
 
-  async createAccountUser(body: createUserDto): Promise<User> {
-    //Checking Email
-    const useData = await this.prismaService.user.findUnique({
-      where: {
-        email: body.email,
-      },
-    });
+  // async createAccountUser(body: createUserDto): Promise<User> {
+  //   //Checking Email
+  //   const useData = await this.prismaService.user.findUnique({
+  //     where: {
+  //       email: body.email,
+  //     },
+  //   });
 
-    if (useData) {
-      throw new HttpException(
-        { message: 'This Email has been User' },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    //Hash password
-    const hashPassword = await hash(body.password, 10);
-    const res = await this.prismaService.user.create({
-      data: { ...body, password: hashPassword },
-    });
-    return res;
-  }
+  //   if (useData) {
+  //     throw new HttpException(
+  //       { message: 'This Email has been User' },
+  //       HttpStatus.BAD_REQUEST,
+  //     );
+  //   }
+  //   //Hash password
+  //   const hashPassword = await hash(body.password, 10);
+  //   const res = await this.prismaService.user.create({
+  //     data: { ...body, password: hashPassword },
+  //   });
+  //   return res;
+  // }
 
-  
   async getAllUser(
     filters: UserFilerType,
   ): Promise<UserPaginationResponseType> {

@@ -94,40 +94,70 @@ export class TasksService {
     });
   }
 
-  // async takeTask(id: number, assigneeId: number) {
-  //   return await this.prismaService.tasks.update({
-  //     where: { id },
-  //     data: { assigneeId },
-  //   });
-  // }
-
   async takeTask(id: number, takeTaskDto: TakeTaskDto): Promise<Tasks> {
     const checkTask = await this.prismaService.tasks.findFirst({
       where: { id },
     });
     if (!checkTask) throw new Error('Task already assigned');
+
+    console.log('takeTaskDto.assigneeId', takeTaskDto.assigneeId);
+
     const updatedTask = await this.prismaService.tasks.update({
       where: { id },
       data: {
-        assigneeId: takeTaskDto.assigneeId ?? null,
+        assigneeId: takeTaskDto.assigneeId,
         isAssigned: true,
+      },
+    });
+    return updatedTask;
+  }
+
+  async cancelTask(id: number, assigneeId: number): Promise<Tasks> {
+    const task = await this.prismaService.tasks.findFirst({
+      where: { id },
+      select: { assigneeId: true },
+    });
+
+    if (!task) throw new Error('Task Not Found');
+
+    if (task.assigneeId !== assigneeId) {
+      throw new Error('Only the assignee can cancel this task');
+    }
+    const updateTask = await this.prismaService.tasks.update({
+      where: { id },
+      data: {
+        assigneeId: null,
+        isAssigned: false,
+      },
+    });
+
+    return updateTask;
+  }
+
+  async completeTask(id: number, userId: number) {
+    const task = await this.prismaService.tasks.findUnique({
+      where: { id },
+      select: { assigneeId: true },
+    });
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
+    if (task.assigneeId !== userId) {
+      throw new Error(
+        'Only the assignee or an admin can mark this task as complete',
+      );
+    }
+
+    const updatedTask = await this.prismaService.tasks.update({
+      where: { id },
+      data: {
+        isCompleted: true,
       },
     });
 
     return updatedTask;
   }
-
-  // async cancelTask(id: number): Promise<Tasks> {
-  //   const task = await this.prismaService.tasks.update({
-  //     where: { id },
-  //     data: {
-  //       assigneeId: null,
-  //       isAssigned: false,
-  //     },
-  //   });
-
-  //   return task;
-  // }
 
   async deleteTask(id: number): Promise<Tasks> {
     return await this.prismaService.tasks.delete({

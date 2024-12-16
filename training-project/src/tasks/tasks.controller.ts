@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   ParseIntPipe,
@@ -24,6 +25,8 @@ import { TasksService } from './tasks.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
+import { Role } from '@prisma/client';
+import { ParamsTokenFactory } from '@nestjs/core/pipes';
 
 @Controller('tasks')
 export class TasksController {
@@ -64,21 +67,44 @@ export class TasksController {
     return this.taskService.updateTask(id, data);
   }
 
-  //Function Take Task
-  // @Put(':id/take')
+  // @Put('/task/:id')
   // @UseGuards(AuthGuard, RoleGuard)
   // @Roles('USER')
   // takeTask(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
-  //   const userId = req.user.id;
-  //   return this.taskService.takeTask(id, userId);
+  //   const assigneeId = req.user.id;
+
+  //   console.log('assigneeId', assigneeId);
+
+  //   return this.taskService.takeTask(id, { assigneeId });
   // }
 
   @Put('/task/:id')
   @UseGuards(AuthGuard, RoleGuard)
-  // @Roles('USER')
+  @Roles('USER')
   takeTask(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
     const assigneeId = req.user.id;
-    return this.taskService.takeTask(id, assigneeId);
+    return this.taskService.takeTask(id, { assigneeId });
+  }
+  
+  @Put('/cancelTask/:id')
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles('USER', 'ADMIN')
+  cancelTask(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    const assigneeId = req.user.id;
+    return this.taskService.cancelTask(id, assigneeId);
+  }
+
+  @Put('/completeTask/:id')
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles('USER', 'ADMIN')
+  async completeTask(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    const userId = req.user.id;
+
+    try {
+      return await this.taskService.completeTask(id, userId);
+    } catch (error) {
+      throw new ForbiddenException(error.message);
+    }
   }
 
   @Delete(':id')
