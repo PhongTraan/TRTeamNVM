@@ -25,14 +25,10 @@ export class UpdateTaskDto {
   description?: string;
   isCompleted?: boolean;
   isActive?: boolean;
+  assigneeId?: number;
+  isAssigned?: boolean;
 }
-
-// export class TakeTaskDto {
-//   assigneeId: number;
-//   isAssigned: boolean;
-// }
-
 export class TakeTaskDto {
-  assigneeId: number;
-  isAssigned?: boolean; 
+  assigneeId?: number;
+  isAssigned?: boolean;
 }

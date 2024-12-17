@@ -3,6 +3,7 @@ import { Comment } from '@prisma/client';
 export class CreateCommentDto {
   message: string;
   userId: number;
+  taskId: number;
 }
 
 export interface CommentFileType {

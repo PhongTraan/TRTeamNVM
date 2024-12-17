@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -9,7 +10,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import {
   createUserDto,
   updateProfileUserDto,
@@ -48,6 +49,13 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Body() data: updateProfileUserDto,
   ): Promise<User> {
-    return this, this.userService.updateAccountUser(id, data);
+    return this.userService.updateAccountUser(id, data);
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles('ADMIN')
+  deleteUserAccount(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return this.userService.deleteUserAccount(id);
   }
 }

@@ -6,7 +6,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
   Put,
   Query,
@@ -16,7 +15,6 @@ import {
 import { TasksModule } from './tasks.module';
 import {
   CreateTaskDto,
-  TakeTaskDto,
   TaskFileType,
   TaskPaginationResponseType,
   UpdateTaskDto,
@@ -25,8 +23,6 @@ import { TasksService } from './tasks.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
-import { Role } from '@prisma/client';
-import { ParamsTokenFactory } from '@nestjs/core/pipes';
 
 @Controller('tasks')
 export class TasksController {
@@ -67,17 +63,6 @@ export class TasksController {
     return this.taskService.updateTask(id, data);
   }
 
-  // @Put('/task/:id')
-  // @UseGuards(AuthGuard, RoleGuard)
-  // @Roles('USER')
-  // takeTask(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
-  //   const assigneeId = req.user.id;
-
-  //   console.log('assigneeId', assigneeId);
-
-  //   return this.taskService.takeTask(id, { assigneeId });
-  // }
-
   @Put('/task/:id')
   @UseGuards(AuthGuard, RoleGuard)
   @Roles('USER')
@@ -85,7 +70,7 @@ export class TasksController {
     const assigneeId = req.user.id;
     return this.taskService.takeTask(id, { assigneeId });
   }
-  
+
   @Put('/cancelTask/:id')
   @UseGuards(AuthGuard, RoleGuard)
   @Roles('USER', 'ADMIN')

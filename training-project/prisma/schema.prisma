@@ -57,22 +57,24 @@ model Comment {
   message   String
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
+  taskId    Int
+  task      Tasks    @relation(fields: [taskId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Tasks {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
   description String
-  isAssigned  Boolean  @default(false)  
-  isCompleted Boolean  @default(false)
-  isActive    Boolean  @default(true)
+  isAssigned  Boolean   @default(false)
+  isCompleted Boolean   @default(false)
+  isActive    Boolean   @default(true)
   creatorId   Int
   assigneeId  Int?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  creator  User  @relation("CreatedTasks", fields: [creatorId], references: [id])
-  assignee User? @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  comments    Comment[]
+  creator     User      @relation("CreatedTasks", fields: [creatorId], references: [id])
+  assignee    User?     @relation("AssignedTasks", fields: [assigneeId], references: [id])
 }

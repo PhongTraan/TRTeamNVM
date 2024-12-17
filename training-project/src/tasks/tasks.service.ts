@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { TaskRepository } from './tasks.repository';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   CreateTaskDto,
   TakeTaskDto,
@@ -13,10 +19,13 @@ import { Tasks } from '@prisma/client';
 
 @Injectable()
 export class TasksService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private taskRepository: TaskRepository,
+  ) {}
 
-  async createTask(data: CreateTaskDto): Promise<TasksModule> {
-    return await this.prismaService.tasks.create({ data });
+  async createTask(data: CreateTaskDto): Promise<Tasks> {
+    return await this.taskRepository.createTask(data);
   }
 
   async getAllTasks(filter: TaskFileType): Promise<TaskPaginationResponseType> {
@@ -24,53 +33,10 @@ export class TasksService {
     const page = Number(filter.page) || 1;
     const search = filter.search || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
-
-    const tasks = await this.prismaService.tasks.findMany({
-      take: items_per_page,
-      skip,
-      where: {
-        OR: [
-          {
-            title: {
-              contains: search,
-              mode: 'insensitive',
-            },
-            description: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    const total = await this.prismaService.tasks.count({
-      take: items_per_page,
-      skip,
-      where: {
-        OR: [
-          {
-            title: {
-              contains: search,
-              mode: 'insensitive',
-            },
-            description: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
+    const points = await this.taskRepository.findByAllTask(search, skip, page);
+    const total = await this.taskRepository.countTask(search);
     return {
-      data: tasks,
+      data: points,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
@@ -78,29 +44,16 @@ export class TasksService {
   }
 
   async getDetailsTask(id: number): Promise<Tasks> {
-    return await this.prismaService.tasks.findFirst({
-      where: {
-        id,
-      },
-    });
+    return await this.taskRepository.findUserById(id);
   }
 
   async updateTask(id: number, data: UpdateTaskDto): Promise<Tasks> {
-    return await this.prismaService.tasks.update({
-      where: {
-        id,
-      },
-      data,
-    });
+    return await this.taskRepository.updateTask(id, data);
   }
 
   async takeTask(id: number, takeTaskDto: TakeTaskDto): Promise<Tasks> {
-    const checkTask = await this.prismaService.tasks.findFirst({
-      where: { id },
-    });
+    const checkTask = await this.taskRepository.findByIdTask(id);
     if (!checkTask) throw new Error('Task already assigned');
-
-    console.log('takeTaskDto.assigneeId', takeTaskDto.assigneeId);
 
     const updatedTask = await this.prismaService.tasks.update({
       where: { id },
@@ -113,57 +66,45 @@ export class TasksService {
   }
 
   async cancelTask(id: number, assigneeId: number): Promise<Tasks> {
-    const task = await this.prismaService.tasks.findFirst({
-      where: { id },
-      select: { assigneeId: true },
+    const task = await this.taskRepository.findTaskWithConditions(id, {
+      assigneeId: true,
     });
+    if (!task) throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
 
-    if (!task) throw new Error('Task Not Found');
+    if (task.assigneeId !== assigneeId)
+      throw new HttpException(
+        'Only the assignee can cancel this task',
+        HttpStatus.FORBIDDEN,
+      );
 
-    if (task.assigneeId !== assigneeId) {
-      throw new Error('Only the assignee can cancel this task');
-    }
-    const updateTask = await this.prismaService.tasks.update({
-      where: { id },
-      data: {
-        assigneeId: null,
-        isAssigned: false,
-      },
+    const updateTask = await this.taskRepository.updateTask(id, {
+      assigneeId: null,
+      isAssigned: false,
     });
 
     return updateTask;
   }
 
-  async completeTask(id: number, userId: number) {
-    const task = await this.prismaService.tasks.findUnique({
-      where: { id },
-      select: { assigneeId: true },
-    });
-    if (!task) {
-      throw new Error('Task not found');
-    }
+  async completeTask(id: number, assigneeId: number) {
+    const task = await this.taskRepository.findByIdTask(id);
+    if (!task) throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
 
-    if (task.assigneeId !== userId) {
-      throw new Error(
+    console.log('task.assigneeId ', task.assigneeId);
+
+    if (task.assigneeId !== assigneeId)
+      throw new HttpException(
         'Only the assignee or an admin can mark this task as complete',
+        HttpStatus.FORBIDDEN,
       );
-    }
 
-    const updatedTask = await this.prismaService.tasks.update({
-      where: { id },
-      data: {
-        isCompleted: true,
-      },
+    const updatedTask = await this.taskRepository.updateTask(id, {
+      isCompleted: true,
     });
 
     return updatedTask;
   }
 
   async deleteTask(id: number): Promise<Tasks> {
-    return await this.prismaService.tasks.delete({
-      where: {
-        id,
-      },
-    });
+    return await this.taskRepository.deleteByIdTask(id);
   }
 }

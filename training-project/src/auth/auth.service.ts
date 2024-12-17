@@ -4,20 +4,18 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { hash, compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { AuthRepository } from './auth.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prismaService: PrismaService,
     private jwtService: JwtService,
+    private authRepository: AuthRepository,
   ) {}
 
   register = async (useData: RegisterDto): Promise<User> => {
-    const user = await this.prismaService.user.findUnique({
-      where: {
-        email: useData.email,
-      },
-    });
+    const user = await this.authRepository.findUserByEmail(useData.email);
     if (user) {
       throw new HttpException(
         { message: 'This Email has been used' },
@@ -25,24 +23,13 @@ export class AuthService {
       );
     }
     //Step2: Hash Password and store to db
-    const hashPassword = await hash(useData.password, 10);
-
-    const res = await this.prismaService.user.create({
-      // data: { ...useData, password: hashPassword, role: 'ADMIN' },
-      data: { ...useData, password: hashPassword, role: 'USER' },
-    });
-
-    return res;
+    return await this.authRepository.createUser(useData);
   };
 
   // Logic Login
   login = async (data: { email: string; password: string }): Promise<any> => {
-    //Step 1: Checking User is exist by email
-    const user = await this.prismaService.user.findUnique({
-      where: {
-        email: data.email,
-      },
-    });
+    const user = await this.authRepository.findUserByEmail(data.email);
+
     if (!user) {
       throw new HttpException(
         { message: 'Account Is Not Exit' },
@@ -50,12 +37,10 @@ export class AuthService {
       );
     }
 
-    //Step 2: Check Password
-    const verify = await compare(data.password, user.password);
-
-    if (!verify) {
+    const isPasswordValid = await this.authRepository.verifyPassword(data.email, data.password);
+    if (!isPasswordValid) {
       throw new HttpException(
-        { message: 'Password does not account.' },
+        { message: 'Invalid password' },
         HttpStatus.UNAUTHORIZED,
       );
     }

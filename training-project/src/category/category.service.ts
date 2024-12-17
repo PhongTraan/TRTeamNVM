@@ -7,13 +7,14 @@ import {
   UpdateCategoryDto,
 } from 'src/dto/category.dto';
 import { PrismaService } from 'src/prisma.service';
+import { CategoryRepository } from './category.repository';
 
 @Injectable()
 export class CategoryService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private categoryRepository: CategoryRepository) {}
 
   async createPost(data: CreateCategoryDto): Promise<Category> {
-    return this.prismaService.category.create({ data });
+    return await this.categoryRepository.createCategory(data);
   }
 
   async getAllCategory(
@@ -24,42 +25,16 @@ export class CategoryService {
     const search = filter.search || '';
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
 
-    const points = await this.prismaService.category.findFirst({
-      take: items_per_page,
+    const data = await this.categoryRepository.findCategories(
+      search,
       skip,
-      where: {
-        OR: [
-          {
-            name: {
-              contains: search,
-            },
-            description: {
-              contains: search,
-            },
-          },
-        ],
-      },
-    });
+      items_per_page,
+    );
 
-    const total = await this.prismaService.category.count({
-      take: items_per_page,
-      skip,
-      where: {
-        OR: [
-          {
-            name: {
-              contains: search,
-            },
-            description: {
-              contains: search,
-            },
-          },
-        ],
-      },
-    });
+    const total = await this.categoryRepository.countCategories(search);
 
     return {
-      data: [points],
+      data,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
@@ -67,27 +42,14 @@ export class CategoryService {
   }
 
   async getDetailsCategory(id: number): Promise<Category> {
-    return this.prismaService.category.findFirst({
-      where: {
-        id,
-      },
-    });
+    return await this.categoryRepository.findBuyIdCategory(id);
   }
 
   async updateCategory(id: number, data: UpdateCategoryDto): Promise<Category> {
-    return await this.prismaService.category.update({
-      where: {
-        id,
-      },
-      data,
-    });
+    return await this.categoryRepository.updateCategory(id, data);
   }
 
   async deleteCategory(id: number): Promise<Category> {
-    return await this.prismaService.category.delete({
-      where: {
-        id,
-      },
-    });
+    return await this.categoryRepository.deleteBuyIdCategory(id);
   }
 }

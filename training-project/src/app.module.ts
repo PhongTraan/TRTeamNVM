@@ -11,6 +11,7 @@ import { CategoryModule } from './category/category.module';
 import { CommentModule } from './comment/comment.module';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { TasksModule } from './tasks/tasks.module';
+import { UserRepository } from './user/user.repository';
 
 @Module({
   imports: [
@@ -23,6 +24,6 @@ import { TasksModule } from './tasks/tasks.module';
     TasksModule,
   ],
   controllers: [AppController, UserController],
-  providers: [AppService, PrismaService, UserService],
+  providers: [AppService, PrismaService, UserService, UserRepository],
 })
 export class AppModule {}

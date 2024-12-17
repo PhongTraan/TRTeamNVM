@@ -1,3 +1,4 @@
+import { UserRepository } from './user.repository';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { hash } from 'bcrypt';
@@ -11,7 +12,10 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private userRepository: UserRepository,
+  ) {}
 
   // async createAccountUser(body: createUserDto): Promise<User> {
   //   //Checking Email
@@ -43,50 +47,13 @@ export class UserService {
     const search = filters.search || '';
 
     const skip = page > 1 ? (page - 1) * items_per_page : 0;
-    const users = await this.prismaService.user.findMany({
-      take: items_per_page,
-      skip,
-      where: {
-        OR: [
-          {
-            name: {
-              contains: search,
-            },
-            email: {
-              contains: search,
-            },
-          },
-        ],
-        AND: [{ status: 2 }],
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
 
-    const total = await this.prismaService.user.count({
-      take: items_per_page,
-      skip,
-      where: {
-        OR: [
-          {
-            name: {
-              contains: search,
-            },
-            email: {
-              contains: search,
-            },
-          },
-        ],
-        AND: [{ status: 2 }],
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    const points = await this.userRepository.findByAllUser(search, skip, page);
+
+    const total = await this.userRepository.countUser(search);
 
     return {
-      data: users,
+      data: points,
       total,
       currentPage: page,
       itemsPerPage: items_per_page,
@@ -94,22 +61,17 @@ export class UserService {
   }
 
   async getDetailsUser(id: number): Promise<User> {
-    return this.prismaService.user.findFirst({
-      where: {
-        id,
-      },
-    });
+    return await this.userRepository.findUserById(id);
   }
 
   async updateAccountUser(
     id: number,
     data: updateProfileUserDto,
   ): Promise<User> {
-    return await this.prismaService.user.update({
-      where: {
-        id,
-      },
-      data,
-    });
+    return this.userRepository.updateUserAccount(id, data);
+  }
+
+  async deleteUserAccount(id: number): Promise<User> {
+    return await this.userRepository.deleteUserAccountById(id);
   }
 }
