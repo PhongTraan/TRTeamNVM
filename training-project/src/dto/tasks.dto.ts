@@ -9,7 +9,7 @@ export class CreateTaskDto {
 
 export class TaskFileType {
   items_per_page?: string;
-  page?: string;
+  page?: number;
   search?: string;
 }
 

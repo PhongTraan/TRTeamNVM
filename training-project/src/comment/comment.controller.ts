@@ -1,15 +1,5 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-  Query,
-} from '@nestjs/common';
-import { Comment, PrismaClient } from '@prisma/client';
-import { CreateCategoryDto } from 'src/dto/category.dto';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Comment } from '@prisma/client';
 import {
   CommentFileType,
   CommentPaginationResponseType,

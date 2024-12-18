@@ -25,10 +25,6 @@ import { RoleGuard } from 'src/auth/roles.guard';
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
-  // @Post('register')
-  // createUser(@Body() body: createUserDto): Promise<User> {
-  //   return this.userService.createAccountUser(body);
-  // }
 
   @Get('getAllUser')
   @UseGuards(AuthGuard, RoleGuard)

@@ -8,7 +8,7 @@ export class CreateCommentDto {
 
 export interface CommentFileType {
   items_per_page?: string;
-  page?: string;
+  page?: number;
   search?: string;
 }
 

@@ -9,7 +9,6 @@ import { AuthRepository } from './auth.repository';
 @Injectable()
 export class AuthService {
   constructor(
-    private prismaService: PrismaService,
     private jwtService: JwtService,
     private authRepository: AuthRepository,
   ) {}
@@ -22,7 +21,6 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    //Step2: Hash Password and store to db
     return await this.authRepository.createUser(useData);
   };
 
@@ -37,7 +35,10 @@ export class AuthService {
       );
     }
 
-    const isPasswordValid = await this.authRepository.verifyPassword(data.email, data.password);
+    const isPasswordValid = await this.authRepository.verifyPassword(
+      data.email,
+      data.password,
+    );
     if (!isPasswordValid) {
       throw new HttpException(
         { message: 'Invalid password' },

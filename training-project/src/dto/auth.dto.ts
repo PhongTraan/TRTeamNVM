@@ -12,7 +12,7 @@ export class RegisterDto {
   @MinLength(6)
   password: string;
 
-  role: number;
+  role?: string;
 }
 
 export class LoginDto {
