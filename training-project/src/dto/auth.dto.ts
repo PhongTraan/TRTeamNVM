@@ -1,7 +1,10 @@
+import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 
+@Exclude()
 export class RegisterDto {
   @IsNotEmpty()
+  @Expose()
   name: string;
 
   phone: string;

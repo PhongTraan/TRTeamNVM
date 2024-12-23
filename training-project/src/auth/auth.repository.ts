@@ -23,6 +23,7 @@ export class AuthRepository {
         name: data.name,
         phone: data.phone,
         role: 'USER',
+        status: 2,
         // role: 'ADMIN',
       },
     });

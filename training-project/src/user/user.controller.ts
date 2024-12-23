@@ -10,9 +10,8 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { Role, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import {
-  createUserDto,
   updateProfileUserDto,
   UserFilerType,
   UserPaginationResponseType,
@@ -23,11 +22,11 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { RoleGuard } from 'src/auth/roles.guard';
 
 @Controller('users')
+@UseGuards(AuthGuard, RoleGuard)
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Get('getAllUser')
-  @UseGuards(AuthGuard, RoleGuard)
   @Roles('ADMIN')
   getAllUser(
     @Query() param: UserFilerType,
@@ -36,11 +35,13 @@ export class UserController {
   }
 
   @Get(':id')
+  @Roles('ADMIN', 'USER')
   getDetailsId(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return this.userService.getDetailsUser(id);
   }
 
   @Put(':id')
+  @Roles('USER')
   updateProfileUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() data: updateProfileUserDto,
@@ -49,7 +50,6 @@ export class UserController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard, RoleGuard)
   @Roles('ADMIN')
   deleteUserAccount(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return this.userService.deleteUserAccount(id);

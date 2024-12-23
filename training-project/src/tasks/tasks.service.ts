@@ -45,7 +45,7 @@ export class TasksService {
 
   async getDetailsTask(id: number): Promise<Tasks> {
     return await this.taskRepository.findUserById(id);
-  }
+  } 
 
   async updateTask(id: number, data: UpdateTaskDto): Promise<Tasks> {
     return await this.taskRepository.updateTask(id, data);
